@@ -1,0 +1,29 @@
+{% extends "words/base.html" %}
+
+{% block title %}Главная{% endblock %}
+
+{% block content %}
+<h1>Добро пожаловать в Language Trainer!</h1>
+<p>Этот сервис поможет вам изучать иностранные слова эффективно.</p>
+
+<div class="row mt-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Категории слов</h5>
+                <p class="card-text">Просматривайте слова по категориям для удобного изучения.</p>
+                <a href="{% url 'category_list' %}" class="btn btn-primary">Перейти к категориям</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Все слова</h5>
+                <p class="card-text">Просматривайте все добавленные слова в одном месте.</p>
+                <a href="{% url 'word_list' %}" class="btn btn-primary">Перейти к словам</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,39 @@
+{% extends "words/base.html" %}
+
+{% block title %}Слова категории {{ category.name }}{% endblock %}
+
+{% block content %}
+<h1>Слова категории: {{ category.name }}</h1>
+{% if category.description %}
+<p>{{ category.description }}</p>
+{% endif %}
+
+<div class="table-container">
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Иностранное слово</th>
+                <th>Перевод</th>
+                <th>Транскрипция</th>
+                <th>Пример</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for word in words %}
+            <tr>
+                <td>{{ word.original }}</td>
+                <td>{{ word.translation }}</td>
+                <td>{{ word.transcription|default:"-" }}</td>
+                <td>{{ word.example|default:"-" }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="4">В этой категории нет слов. <a href="{% url 'add_word' %}">Добавить слово</a></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<a href="{% url 'category_list' %}" class="btn btn-secondary">Назад к категориям</a>
+{% endblock %}

@@ -1,0 +1,30 @@
+{% extends "words/base.html" %}
+
+{% block title %}Добавить категорию{% endblock %}
+
+{% block content %}
+<h1>Добавить новую категорию</h1>
+
+<form method="post">
+    {% csrf_token %}
+
+    <div class="mb-3">
+        {{ form.name.label_tag }}
+        {{ form.name }}
+        {% if form.name.errors %}
+            <div class="text-danger">{{ form.name.errors }}</div>
+        {% endif %}
+    </div>
+
+    <div class="mb-3">
+        {{ form.description.label_tag }}
+        {{ form.description }}
+        {% if form.description.errors %}
+            <div class="text-danger">{{ form.description.errors }}</div>
+        {% endif %}
+    </div>
+
+    <button type="submit" class="btn btn-primary">Сохранить</button>
+    <a href="{% url 'category_list' %}" class="btn btn-secondary">Отмена</a>
+</form>
+{% endblock %}

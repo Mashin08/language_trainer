@@ -1,0 +1,54 @@
+{% extends "words/base.html" %}
+
+{% block title %}Добавить слово{% endblock %}
+
+{% block content %}
+<h1>Добавить новое слово</h1>
+
+<form method="post">
+    {% csrf_token %}
+
+    <div class="mb-3">
+        {{ form.original.label_tag }}
+        {{ form.original }}
+        {% if form.original.errors %}
+            <div class="text-danger">{{ form.original.errors }}</div>
+        {% endif %}
+    </div>
+
+    <div class="mb-3">
+        {{ form.translation.label_tag }}
+        {{ form.translation }}
+        {% if form.translation.errors %}
+            <div class="text-danger">{{ form.translation.errors }}</div>
+        {% endif %}
+    </div>
+
+    <div class="mb-3">
+        {{ form.transcription.label_tag }}
+        {{ form.transcription }}
+        {% if form.transcription.errors %}
+            <div class="text-danger">{{ form.transcription.errors }}</div>
+        {% endif %}
+    </div>
+
+    <div class="mb-3">
+        {{ form.example.label_tag }}
+        {{ form.example }}
+        {% if form.example.errors %}
+            <div class="text-danger">{{ form.example.errors }}</div>
+        {% endif %}
+    </div>
+
+    <div class="mb-3">
+        {{ form.category.label_tag }}
+        {{ form.category }}
+        {% if form.category.errors %}
+            <div class="text-danger">{{ form.category.errors }}</div>
+        {% endif %}
+    </div>
+
+    <button type="submit" class="btn btn-primary">Сохранить</button>
+    <a href="{% url 'word_list' %}" class="btn btn-secondary">Отмена</a>
+</form>
+{% endblock %}

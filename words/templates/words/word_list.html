@@ -1,0 +1,36 @@
+{% extends "words/base.html" %}
+
+{% block title %}Все слова{% endblock %}
+
+{% block content %}
+<h1>Все слова</h1>
+
+<div class="table-container">
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Иностранное слово</th>
+                <th>Перевод</th>
+                <th>Транскрипция</th>
+                <th>Категория</th>
+                <th>Пример</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for word in words %}
+            <tr>
+                <td>{{ word.original }}</td>
+                <td>{{ word.translation }}</td>
+                <td>{{ word.transcription|default:"-" }}</td>
+                <td>{{ word.category.name|default:"-" }}</td>
+                <td>{{ word.example|default:"-"|truncatechars:50 }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5">Слова не найдены. <a href="{% url 'add_word' %}">Добавить слово</a></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
