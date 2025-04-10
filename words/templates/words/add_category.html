@@ -5,26 +5,127 @@
 {% block content %}
 <h1>Добавить новую категорию</h1>
 
-<form method="post">
+{# Добавляем блок для системных сообщений #}
+{% if messages %}
+<div class="alert-container">
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+{# Добавляем novalidate для кастомной валидации и проверки на сервере #}
+<form method="post" novalidate>
     {% csrf_token %}
+
+    {# Вывод ошибок не связанных с конкретными полями #}
+    {% if form.non_field_errors %}
+    <div class="alert alert-danger">
+        {% for error in form.non_field_errors %}
+            {{ error }}
+        {% endfor %}
+    </div>
+    {% endif %}
 
     <div class="mb-3">
         {{ form.name.label_tag }}
+        {# Добавляем HTML5 атрибуты валидации #}
         {{ form.name }}
         {% if form.name.errors %}
-            <div class="text-danger">{{ form.name.errors }}</div>
+            <div class="invalid-feedback d-block">
+                {% for error in form.name.errors %}
+                    {{ error }}
+                {% endfor %}
+            </div>
         {% endif %}
+        {# Добавляем подсказку для пользователя #}
+        <div class="form-text">Минимум 2 символа, только буквы и цифры</div>
     </div>
 
     <div class="mb-3">
         {{ form.description.label_tag }}
         {{ form.description }}
         {% if form.description.errors %}
-            <div class="text-danger">{{ form.description.errors }}</div>
+            <div class="invalid-feedback d-block">
+                {% for error in form.description.errors %}
+                    {{ error }}
+                {% endfor %}
+            </div>
         {% endif %}
+        <div class="form-text">Необязательное поле</div>
     </div>
 
     <button type="submit" class="btn btn-primary">Сохранить</button>
     <a href="{% url 'category_list' %}" class="btn btn-secondary">Отмена</a>
 </form>
+
+{# Добавляем стили для валидации #}
+<style>
+    /* Стили для невалидных полей */
+    .is-invalid {
+        border-color: #dc3545;
+        padding-right: calc(1.5em + 0.75rem);
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='none' stroke='%23dc3545' viewBox='0 0 12 12'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath stroke-linejoin='round' d='M5.8 3.6h.4L6 6.5z'/%3e%3ccircle cx='6' cy='8.2' r='.6' fill='%23dc3545' stroke='none'/%3e%3c/svg%3e");
+        background-repeat: no-repeat;
+        background-position: right calc(0.375em + 0.1875rem) center;
+        background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+    }
+
+    /* Стили для валидных полей */
+    .is-valid {
+        border-color: #28a745;
+        padding-right: calc(1.5em + 0.75rem);
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8'%3e%3cpath fill='%2328a745' d='M2.3 6.73L.6 4.53c-.4-1.04.46-1.4 1.1-.8l1.1 1.4 3.4-3.8c.6-.63 1.6-.27 1.2.7l-4 4.6c-.43.5-.8.4-1.1.1z'/%3e%3c/svg%3e");
+        background-repeat: no-repeat;
+        background-position: right calc(0.375em + 0.1875rem) center;
+        background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+    }
+
+    .form-text {
+        font-size: 0.875em;
+        color: #6c757d;
+    }
+
+    .alert-container {
+        position: absolute;
+        top: 150px;  /* Отступ от верха */
+        right: 200px;
+        z-index: 1000;
+        min-width: 300px;
+        max-width: 80%;
+    }
+</style>
+
+{# Добавляем JavaScript для динамической валидации #}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Добавляем обработчики изменения полей
+    const nameField = document.querySelector('#id_name');
+    const descriptionField = document.querySelector('#id_description');
+
+    if (nameField) {
+        nameField.addEventListener('input', function() {
+            this.classList.remove('is-invalid', 'is-valid');
+            if (this.value.length > 0) {
+                if (this.value.length < 2 || !/^[a-zA-Zа-яА-Я0-9 ]+$/.test(this.value)) {
+                    this.classList.add('is-invalid');
+                } else {
+                    this.classList.add('is-valid');
+                }
+            }
+        });
+    }
+
+    // Закрытие alert сообщений
+    const alertCloseButtons = document.querySelectorAll('.alert-dismissible .btn-close');
+    alertCloseButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            this.closest('.alert').remove();
+        });
+    });
+});
+</script>
 {% endblock %}

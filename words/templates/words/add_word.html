@@ -5,50 +5,219 @@
 {% block content %}
 <h1>Добавить новое слово</h1>
 
-<form method="post">
+{# Блок системных сообщений #}
+{% if messages %}
+<div class="alert-container">
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<form method="post" novalidate>
     {% csrf_token %}
 
+    {# Общие ошибки формы #}
+    {% if form.non_field_errors %}
+    <div class="alert alert-danger">
+        {% for error in form.non_field_errors %}
+            {{ error }}
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {# Поле "Иностранное слово" #}
     <div class="mb-3">
         {{ form.original.label_tag }}
         {{ form.original }}
         {% if form.original.errors %}
-            <div class="text-danger">{{ form.original.errors }}</div>
+            <div class="invalid-feedback d-block">
+                {% for error in form.original.errors %}
+                    {{ error }}
+                {% endfor %}
+            </div>
         {% endif %}
+        <div class="form-text">
+            Минимум 2 символа, только буквы и дефис. Пример: "hello", "привет"
+        </div>
     </div>
 
+    {# Поле "Перевод" #}
     <div class="mb-3">
         {{ form.translation.label_tag }}
         {{ form.translation }}
         {% if form.translation.errors %}
-            <div class="text-danger">{{ form.translation.errors }}</div>
+            <div class="invalid-feedback d-block">
+                {% for error in form.translation.errors %}
+                    {{ error }}
+                {% endfor %}
+            </div>
         {% endif %}
+        <div class="form-text">Минимум 2 символа</div>
     </div>
 
+    {# Поле "Транскрипция" #}
     <div class="mb-3">
         {{ form.transcription.label_tag }}
         {{ form.transcription }}
         {% if form.transcription.errors %}
-            <div class="text-danger">{{ form.transcription.errors }}</div>
+            <div class="invalid-feedback d-block">
+                {% for error in form.transcription.errors %}
+                    {{ error }}
+                {% endfor %}
+            </div>
         {% endif %}
+        <div class="form-text">
+            Должна быть в квадратных скобках. Пример: [həˈləʊ]
+        </div>
     </div>
 
+    {# Поле "Пример использования" #}
     <div class="mb-3">
         {{ form.example.label_tag }}
         {{ form.example }}
         {% if form.example.errors %}
-            <div class="text-danger">{{ form.example.errors }}</div>
+            <div class="invalid-feedback d-block">
+                {% for error in form.example.errors %}
+                    {{ error }}
+                {% endfor %}
+            </div>
         {% endif %}
+        <div class="form-text">Необязательное поле</div>
     </div>
 
+    {# Поле "Категория" #}
     <div class="mb-3">
         {{ form.category.label_tag }}
         {{ form.category }}
         {% if form.category.errors %}
-            <div class="text-danger">{{ form.category.errors }}</div>
+            <div class="invalid-feedback d-block">
+                {% for error in form.category.errors %}
+                    {{ error }}
+                {% endfor %}
+            </div>
         {% endif %}
+        <div class="form-text">
+            <a href="{% url 'add_category' %}" target="_blank">Добавить новую категорию</a>
+        </div>
     </div>
 
     <button type="submit" class="btn btn-primary">Сохранить</button>
     <a href="{% url 'word_list' %}" class="btn btn-secondary">Отмена</a>
 </form>
+
+{# Стили для валидации #}
+<style>
+    /* Общие стили для валидации */
+    .is-invalid {
+        border-color: #dc3545;
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='none' stroke='%23dc3545' viewBox='0 0 12 12'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath stroke-linejoin='round' d='M5.8 3.6h.4L6 6.5z'/%3e%3ccircle cx='6' cy='8.2' r='.6' fill='%23dc3545' stroke='none'/%3e%3c/svg%3e");
+        background-repeat: no-repeat;
+        background-position: right calc(0.375em + 0.1875rem) center;
+    }
+
+    .is-valid {
+        border-color: #28a745;
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8'%3e%3cpath fill='%2328a745' d='M2.3 6.73L.6 4.53c-.4-1.04.46-1.4 1.1-.8l1.1 1.4 3.4-3.8c.6-.63 1.6-.27 1.2.7l-4 4.6c-.43.5-.8.4-1.1.1z'/%3e%3c/svg%3e");
+        background-repeat: no-repeat;
+        background-position: right calc(0.375em + 0.1875rem) center;
+    }
+
+    .form-text {
+        font-size: 0.875em;
+        color: #6c757d;
+        margin-top: 0.25rem;
+    }
+
+    .alert-container {
+        position: absolute;
+        top: 150px;  /* Отступ от верха */
+        right: 200px;
+        z-index: 1000;
+        min-width: 300px;
+        max-width: 80%;
+    }
+
+    textarea.form-control {
+        min-height: 100px;
+    }
+</style>
+
+{# JavaScript для динамической валидации #}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Функция проверки оригинального слова
+    function validateOriginal() {
+        const value = originalField.value;
+        originalField.classList.remove('is-invalid', 'is-valid');
+
+        if (value.length > 0) {
+            if (value.length < 2 || !/^[a-zA-Zа-яА-Я\- ]+$/.test(value)) {
+                originalField.classList.add('is-invalid');
+            } else {
+                originalField.classList.add('is-valid');
+            }
+        }
+    }
+
+    // Функция проверки перевода
+    function validateTranslation() {
+        const value = translationField.value;
+        translationField.classList.remove('is-invalid', 'is-valid');
+
+        if (value.length > 0) {
+            if (value.length < 2) {
+                translationField.classList.add('is-invalid');
+            } else {
+                translationField.classList.add('is-valid');
+            }
+        }
+    }
+
+    // Функция проверки транскрипции
+    function validateTranscription() {
+        const value = transcriptionField.value;
+        transcriptionField.classList.remove('is-invalid', 'is-valid');
+
+        if (value.length > 0) {
+            if (!/^\[.*\]$/.test(value)) {
+                transcriptionField.classList.add('is-invalid');
+            } else {
+                transcriptionField.classList.add('is-valid');
+            }
+        }
+    }
+
+    // Получаем элементы полей
+    const originalField = document.querySelector('#id_original');
+    const translationField = document.querySelector('#id_translation');
+    const transcriptionField = document.querySelector('#id_transcription');
+
+    // Назначаем обработчики событий
+    if (originalField) {
+        originalField.addEventListener('input', validateOriginal);
+        originalField.addEventListener('blur', validateOriginal);
+    }
+
+    if (translationField) {
+        translationField.addEventListener('input', validateTranslation);
+        translationField.addEventListener('blur', validateTranslation);
+    }
+
+    if (transcriptionField) {
+        transcriptionField.addEventListener('input', validateTranscription);
+        transcriptionField.addEventListener('blur', validateTranscription);
+    }
+
+    // Закрытие alert сообщений
+    document.querySelectorAll('.alert-dismissible .btn-close').forEach(button => {
+        button.addEventListener('click', function() {
+            this.closest('.alert').remove();
+        });
+    });
+});
+</script>
 {% endblock %}

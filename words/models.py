@@ -1,9 +1,20 @@
 from django.db import models
-from django.core.validators import MinLengthValidator
-
+from django.core.validators import MinLengthValidator, RegexValidator
+from django.core.exceptions import ValidationError
 
 class Category(models.Model):
-    name = models.CharField(max_length=100, unique=True, verbose_name="Название категории")
+    name = models.CharField(
+        max_length=100,
+        unique=True,
+        verbose_name="Название категории",
+        validators=[
+            MinLengthValidator(2, "Название категории должно содержать минимум 2 символа"),
+            RegexValidator(
+                regex='^[a-zA-Zа-яА-Я0-9 ]+$',
+                message='Название категории может содержать только буквы и цифры'
+            )
+        ]
+    )
     description = models.TextField(blank=True, verbose_name="Описание")
 
     def __str__(self):
@@ -15,9 +26,35 @@ class Category(models.Model):
 
 
 class Word(models.Model):
-    original = models.CharField(max_length=100, verbose_name="Иностранное слово")
-    translation = models.CharField(max_length=100, verbose_name="Перевод")
-    transcription = models.CharField(max_length=100, blank=True, verbose_name="Транскрипция")
+    original = models.CharField(
+        max_length=100,
+        verbose_name="Иностранное слово",
+        validators=[
+            MinLengthValidator(2, "Слово должно содержать минимум 2 символа"),
+            RegexValidator(
+                regex='^[a-zA-Zа-яА-Я\- ]+$',
+                message='Слово может содержать только буквы и дефис'
+            )
+        ]
+    )
+    translation = models.CharField(
+        max_length=100,
+        verbose_name="Перевод",
+        validators=[
+            MinLengthValidator(2, "Перевод должен содержать минимум 2 символа")
+        ]
+    )
+    transcription = models.CharField(
+        max_length=100,
+        blank=True,
+        verbose_name="Транскрипция",
+        validators=[
+            RegexValidator(
+                regex='^\[.*\]$',
+                message='Транскрипция должна быть заключена в квадратные скобки, например: [ˈwɔːtə]'
+            )
+        ]
+    )
     example = models.TextField(blank=True, verbose_name="Пример использования")
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Категория")
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
