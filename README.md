@@ -49,6 +49,7 @@ python manage.py loaddata words/fixtures/base_words.json
 python manage.py runserver
 ```
 
+📂 Структура проекта
 ```bash
 language_trainer/
 ├── words/                  # Основное приложение
