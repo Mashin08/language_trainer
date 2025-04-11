@@ -65,9 +65,22 @@ class Word(models.Model):
     updated_at = models.DateTimeField(auto_now=True, verbose_name="Дата обновления")
 
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
-    learned = models.BooleanField(default=False)
+    learned = models.BooleanField(
+        default=False,
+        verbose_name="Выучено"
+    )
+    learned_date = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name="Дата изучения"
+    )
     last_reviewed = models.DateTimeField(null=True, blank=True)
     review_count = models.IntegerField(default=0)
+
+    def mark_learned(self):
+        self.learned = True
+        self.learned_date = timezone.now()
+        self.save()
 
     def __str__(self):
         return f"{self.original} - {self.translation}"

@@ -9,7 +9,8 @@ from django.db.models import Count, Q
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.models import User
 from django.views.decorators.http import require_POST
-
+from django.http import JsonResponse
+from django.utils import timezone
 
 def home(request):
     return render(request, 'words/home.html')
@@ -46,12 +47,22 @@ def category_list(request):
 
 
 def word_list(request):
+    learned_filter = request.GET.get('learned', None)
+
     if request.user.is_authenticated:
         words = Word.objects.filter(Q(user=request.user) | Q(user__isnull=True))
     else:
         words = Word.objects.filter(user__isnull=True)
-    return render(request, 'words/word_list.html', {'words': words})
 
+    if learned_filter == 'true':
+        words = words.filter(learned=True)
+    elif learned_filter == 'false':
+        words = words.filter(learned=False)
+
+    return render(request, 'words/word_list.html', {
+        'words': words,
+        'learned_filter': learned_filter
+    })
 
 @login_required
 def add_category(request):
@@ -122,3 +133,33 @@ def stats(request):
     }
 
     return render(request, 'words/stats.html', {'stats': stats})
+
+
+@require_POST
+@login_required
+def toggle_learned_status(request, word_id):
+    word = get_object_or_404(Word, id=word_id, user=request.user)
+    word.learned = not word.learned
+    word.learned_date = timezone.now() if word.learned else None
+    word.save()
+
+    return JsonResponse({
+        'success': True,
+        'learned': word.learned,
+        'updated_date': word.learned_date.strftime('%Y-%m-%d') if word.learned_date else None
+    })
+
+@login_required
+def edit_word(request, word_id):
+    word = get_object_or_404(Word, id=word_id, user=request.user)
+
+    if request.method == 'POST':
+        form = WordForm(request.POST, instance=word)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Слово успешно обновлено")
+            return redirect('word_list')
+    else:
+        form = WordForm(instance=word)
+
+    return render(request, 'words/edit_word.html', {'form': form})

@@ -1,0 +1,16 @@
+{% extends "words/base.html" %}
+
+{% block title %}Редактирование слова{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2 class="mb-4">Редактирование слова</h2>
+    
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-primary">Сохранить</button>
+        <a href="{% url 'word_list' %}" class="btn btn-secondary">Отмена</a>
+    </form>
+</div>
+{% endblock %}

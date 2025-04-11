@@ -3,6 +3,9 @@ from . import views
 from .views import stats
 from django.contrib.auth import views as auth_views
 from .views import register_view, login_view
+from .views import edit_word
+from .views import toggle_learned_status
+
 
 urlpatterns = [
     path('', views.home, name='home'),
@@ -15,4 +18,6 @@ urlpatterns = [
     path('register/', register_view, name='register'),
     path('login/', login_view, name='login'),
     path('logout/', auth_views.LogoutView.as_view(), name='logout'),
+    path('words/<int:word_id>/toggle-learned/', toggle_learned_status, name='toggle_learned'),
+    path('word/<int:word_id>/edit/', edit_word, name='edit_word'),
 ]

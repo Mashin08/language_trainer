@@ -1,74 +1,170 @@
 {% extends "words/base.html" %}
 
+{% block title %}Моя статистика{% endblock %}
+
 {% block content %}
-<!-- Проверка авторизации в самом начале content -->
-{% if not user.is_authenticated %}
-<div class="row justify-content-center">
-    <div class="col-md-8 alert alert-warning text-center">
-        <h4>Требуется авторизация</h4>
-        <p>Для просмотра статистики по выученным словам необходимо войти в систему или зарегистрироваться</p>
-        <div class="d-flex gap-3 justify-content-center">
-            <a href="{% url 'login' %}?next={% url 'add_word' %}" class="btn btn-primary">Войти</a>
-            <a href="{% url 'register' %}" class="btn btn-secondary">Регистрация</a>
+<div class="container">
+    <!-- Проверка авторизации -->
+    {% if not user.is_authenticated %}
+    <div class="row justify-content-center mt-5">
+        <div class="col-lg-8">
+            <div class="card border-warning">
+                <div class="card-header bg-warning text-white">
+                    <h4 class="mb-0"><i class="bi bi-shield-lock"></i> Требуется авторизация</h4>
+                </div>
+                <div class="card-body text-center py-4">
+                    <p class="lead">Для просмотра персональной статистики войдите в систему</p>
+                    <div class="d-flex justify-content-center gap-3 mt-4">
+                        <a href="{% url 'login' %}?next={% url 'stats' %}" class="btn btn-primary btn-lg">
+                            <i class="bi bi-box-arrow-in-right"></i> Войти
+                        </a>
+                        <a href="{% url 'register' %}" class="btn btn-success btn-lg">
+                            <i class="bi bi-person-plus"></i> Регистрация
+                        </a>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
+    {% else %}
+    <!-- Основной контент -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-graph-up"></i> Моя статистика</h2>
+        <a href="{% url 'word_list' %}?learned=false" class="btn btn-outline-primary">
+            <i class="bi bi-book"></i> К словам для изучения
+        </a>
+    </div>
+
+    <!-- Карточки основной статистики -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-4">
+            <div class="card h-100 border-primary">
+                <div class="card-body text-center">
+                    <h5 class="card-title text-muted">Всего слов</h5>
+                    <p class="display-3 text-primary">{{ stats.total }}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card h-100 border-success">
+                <div class="card-body text-center">
+                    <h5 class="card-title text-muted">Выучено</h5>
+                    <p class="display-3 text-success">{{ stats.learned }}</p>
+                    <div class="progress mt-2" style="height: 10px;">
+                        <div class="progress-bar bg-success"
+                             role="progressbar"
+                             style="width: {{ stats.learned_percent }}%"
+                             aria-valuenow="{{ stats.learned_percent }}"
+                             aria-valuemin="0"
+                             aria-valuemax="100">
+                        </div>
+                    </div>
+                    <small class="text-muted">{{ stats.learned_percent }}% от общего числа</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card h-100 border-info">
+                <div class="card-body text-center">
+                    <h5 class="card-title text-muted">Осталось</h5>
+                    <p class="display-3 text-info">{{ stats.to_learn }}</p>
+                    <div class="progress mt-2" style="height: 10px;">
+                        <div class="progress-bar bg-info"
+                             role="progressbar"
+                             style="width: {{ stats.to_learn_percent }}%"
+                             aria-valuenow="{{ stats.to_learn_percent }}"
+                             aria-valuemin="0"
+                             aria-valuemax="100">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Детализированная статистика -->
+    <div class="row g-4">
+        <!-- Статистика по категориям -->
+        <div class="col-lg-6">
+            <div class="card h-100">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0"><i class="bi bi-tags"></i> По категориям</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Категория</th>
+                                    <th class="text-end">Всего</th>
+                                    <th class="text-end">Выучено</th>
+                                    <th class="text-end">%</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in stats.by_category %}
+                                <tr>
+                                    <td>{{ item.category__name|default:"Без категории" }}</td>
+                                    <td class="text-end">{{ item.total }}</td>
+                                    <td class="text-end">{{ item.learned }}</td>
+                                    <td class="text-end">
+                                        <span class="badge bg-{% if item.percent == 100 %}success{% elif item.percent > 50 %}info{% else %}warning{% endif %}">
+                                            {{ item.percent }}%
+                                        </span>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Последние выученные слова -->
+        <div class="col-lg-6">
+            <div class="card h-100">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0"><i class="bi bi-clock-history"></i> Недавняя активность</h5>
+                </div>
+                <div class="card-body">
+                    {% if stats.recent %}
+                    <div class="list-group">
+                        {% for word in stats.recent %}
+                        <div class="list-group-item list-group-item-action">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">{{ word.original }}</h6>
+                                <small class="text-muted">{{ word.learned_date|timesince }} назад</small>
+                            </div>
+                            <p class="mb-1">{{ word.translation }}</p>
+                            <small class="text-muted">{{ word.category.name|default:"Без категории" }}</small>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4 text-muted">
+                        <i class="bi bi-info-circle fs-1"></i>
+                        <p class="mt-2">Нет данных о последней активности</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
 </div>
-{% else %}
-<!-- Основное содержимое для авторизованных пользователей -->
-<h2>Ваша статистика</h2>
 
-<div class="row">
-    <div class="col-md-4">
-        <div class="card">
-            <div class="card-body">
-                <h5 class="card-title">Общее количество слов</h5>
-                <p class="display-4">{{ stats.total }}</p>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-4">
-        <div class="card">
-            <div class="card-body">
-                <h5 class="card-title">Выучено</h5>
-                <p class="display-4">{{ stats.learned }}</p>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-4">
-        <div class="card">
-            <div class="card-body">
-                <h5 class="card-title">Осталось выучить</h5>
-                <p class="display-4">{{ stats.to_learn }}</p>
-            </div>
-        </div>
-    </div>
-</div>
-
-<h3 class="mt-4">По категориям</h3>
-<table class="table">
-    <thead>
-        <tr>
-            <th>Категория</th>
-            <th>Количество слов</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for item in stats.by_category %}
-        <tr>
-            <td>{{ item.category__name|default:"Без категории" }}</td>
-            <td>{{ item.total }}</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
-
-<h3 class="mt-4">Недавно просмотренные</h3>
-<ul>
-    {% for word in stats.recent %}
-    <li>{{ word.original }} - {{ word.translation }}</li>
-    {% empty %}
-    <li>Нет данных</li>
-    {% endfor %}
-</ul>
-{% endif %}  <!-- Закрывающий тег условия авторизации -->
+<!-- Стили для прогресс-баров -->
+<style>
+    .progress {
+        border-radius: 10px;
+        background-color: #f0f0f0;
+    }
+    .progress-bar {
+        border-radius: 10px;
+        transition: width 0.6s ease;
+    }
+</style>
 {% endblock %}
