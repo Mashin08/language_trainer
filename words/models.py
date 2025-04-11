@@ -1,6 +1,8 @@
 from django.db import models
 from django.core.validators import MinLengthValidator, RegexValidator
 from django.core.exceptions import ValidationError
+from django.contrib.auth.models import User
+
 
 class Category(models.Model):
     name = models.CharField(
@@ -16,6 +18,8 @@ class Category(models.Model):
         ]
     )
     description = models.TextField(blank=True, verbose_name="Описание")
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
 
     def __str__(self):
         return self.name
@@ -59,6 +63,11 @@ class Word(models.Model):
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Категория")
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
     updated_at = models.DateTimeField(auto_now=True, verbose_name="Дата обновления")
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
+    learned = models.BooleanField(default=False)
+    last_reviewed = models.DateTimeField(null=True, blank=True)
+    review_count = models.IntegerField(default=0)
 
     def __str__(self):
         return f"{self.original} - {self.translation}"

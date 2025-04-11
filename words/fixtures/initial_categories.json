@@ -1,0 +1,18 @@
+[
+    {
+        "model": "words.category",
+        "fields": {
+            "name": "Основные",
+            "description": "Базовые слова",
+            "user": null
+        }
+    },
+    {
+        "model": "words.category",
+        "fields": {
+            "name": "Приветствия",
+            "description": "Слова для общения",
+            "user": null
+        }
+    }
+]

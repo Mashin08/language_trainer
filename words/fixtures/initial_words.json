@@ -1,0 +1,41 @@
+[
+    {
+        "model": "words.word",
+        "fields": {
+            "original": "hello",
+            "translation": "привет",
+            "transcription": "[həˈləʊ]",
+            "example": "Hello world!",
+            "user": null,
+            "category": 1,
+            "created_at": "2023-01-01T12:00:00Z",
+            "updated_at": "2023-01-01T12:00:00Z"
+        }
+    },
+    {
+        "model": "words.word",
+        "fields": {
+            "original": "goodbye",
+            "translation": "до свидания",
+            "transcription": "[ɡʊdˈbaɪ]",
+            "example": "Goodbye my friend",
+            "user": null,
+            "category": 1,
+            "created_at": "2023-01-01T12:00:00Z",
+            "updated_at": "2023-01-01T12:00:00Z"
+        }
+    },
+    {
+        "model": "words.word",
+        "fields": {
+            "original": "thank you",
+            "translation": "спасибо",
+            "transcription": "[ˈθæŋk juː]",
+            "example": "Thank you very much!",
+            "user": null,
+            "category": 2,
+            "created_at": "2023-01-01T12:00:00Z",
+            "updated_at": "2023-01-01T12:00:00Z"
+        }
+    }
+]

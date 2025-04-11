@@ -1,0 +1,74 @@
+{% extends "words/base.html" %}
+
+{% block content %}
+<!-- Проверка авторизации в самом начале content -->
+{% if not user.is_authenticated %}
+<div class="row justify-content-center">
+    <div class="col-md-8 alert alert-warning text-center">
+        <h4>Требуется авторизация</h4>
+        <p>Для просмотра статистики по выученным словам необходимо войти в систему или зарегистрироваться</p>
+        <div class="d-flex gap-3 justify-content-center">
+            <a href="{% url 'login' %}?next={% url 'add_word' %}" class="btn btn-primary">Войти</a>
+            <a href="{% url 'register' %}" class="btn btn-secondary">Регистрация</a>
+        </div>
+    </div>
+</div>
+{% else %}
+<!-- Основное содержимое для авторизованных пользователей -->
+<h2>Ваша статистика</h2>
+
+<div class="row">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Общее количество слов</h5>
+                <p class="display-4">{{ stats.total }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Выучено</h5>
+                <p class="display-4">{{ stats.learned }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Осталось выучить</h5>
+                <p class="display-4">{{ stats.to_learn }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<h3 class="mt-4">По категориям</h3>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Категория</th>
+            <th>Количество слов</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in stats.by_category %}
+        <tr>
+            <td>{{ item.category__name|default:"Без категории" }}</td>
+            <td>{{ item.total }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<h3 class="mt-4">Недавно просмотренные</h3>
+<ul>
+    {% for word in stats.recent %}
+    <li>{{ word.original }} - {{ word.translation }}</li>
+    {% empty %}
+    <li>Нет данных</li>
+    {% endfor %}
+</ul>
+{% endif %}  <!-- Закрывающий тег условия авторизации -->
+{% endblock %}

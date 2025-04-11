@@ -1,6 +1,7 @@
 from django import forms
 from .models import Category, Word
-
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.models import User
 
 class CategoryForm(forms.ModelForm):
     class Meta:
@@ -56,3 +57,10 @@ class WordForm(forms.ModelForm):
         if Word.objects.filter(original__iexact=original).exists():
             raise forms.ValidationError("Такое слово уже существует в словаре")
         return original
+
+class RegisterForm(UserCreationForm):
+    email = forms.EmailField(required=True)
+
+    class Meta:
+        model = User
+        fields = ["username", "email", "password1", "password2"]

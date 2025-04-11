@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block content %}
+{% if user.is_authenticated %}
+    <!-- Если пользователь уже вошёл -->
+    <script>window.location.href = "{% url 'home' %}";</script>
+{% else %}
+    <!-- Форма входа -->
+    <form method="post" action="{% url 'login' %}">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <input type="hidden" name="next" value="{{ next|default:LOGIN_REDIRECT_URL }}">
+        <button type="submit">Войти</button>
+    </form>
+{% endif %}
+{% endblock %}

@@ -3,6 +3,20 @@
 {% block title %}Добавить слово{% endblock %}
 
 {% block content %}
+<!-- Проверка авторизации в самом начале content -->
+{% if not user.is_authenticated %}
+<div class="row justify-content-center">
+    <div class="col-md-8 alert alert-warning text-center">
+        <h4>Требуется авторизация</h4>
+        <p>Чтобы добавлять слова, войдите в систему или зарегистрируйтесь</p>
+        <div class="d-flex gap-3 justify-content-center">
+            <a href="{% url 'login' %}?next={% url 'add_word' %}" class="btn btn-primary">Войти</a>
+            <a href="{% url 'register' %}" class="btn btn-secondary">Регистрация</a>
+        </div>
+    </div>
+</div>
+{% else %}
+<!-- Основное содержимое для авторизованных пользователей -->
 <h1>Добавить новое слово</h1>
 
 {# Блок системных сообщений #}
@@ -220,4 +234,5 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
+{% endif %}  <!-- Закрывающий тег условия авторизации -->
 {% endblock %}
