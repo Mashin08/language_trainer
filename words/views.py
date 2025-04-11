@@ -40,7 +40,7 @@ def login_view(request):
 
 def category_list(request):
     if request.user.is_authenticated:
-        categories = Category.objects.filter(Q(user=request.user) | Q(user__isnull=True))
+        categories = Category.objects.filter(Q(user=request.user))
     else:
         categories = Category.objects.filter(user__isnull=True)
     return render(request, 'words/category_list.html', {'categories': categories})
@@ -50,7 +50,7 @@ def word_list(request):
     learned_filter = request.GET.get('learned', None)
 
     if request.user.is_authenticated:
-        words = Word.objects.filter(Q(user=request.user) | Q(user__isnull=True))
+        words = Word.objects.filter(Q(user=request.user))
     else:
         words = Word.objects.filter(user__isnull=True)
 

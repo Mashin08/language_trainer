@@ -7,7 +7,6 @@ from django.contrib.auth.models import User
 class Category(models.Model):
     name = models.CharField(
         max_length=100,
-        unique=True,
         verbose_name="Название категории",
         validators=[
             MinLengthValidator(2, "Название категории должно содержать минимум 2 символа"),
@@ -27,6 +26,7 @@ class Category(models.Model):
     class Meta:
         verbose_name = "Категория"
         verbose_name_plural = "Категории"
+        unique_together = ('user', 'name')
 
 
 class Word(models.Model):
