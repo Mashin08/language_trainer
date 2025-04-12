@@ -12,10 +12,16 @@ class CategoryForm(forms.ModelForm):
             'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
         }
 
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user', None)
+        super().__init__(*args, **kwargs)
+
     def clean_name(self):
         name = self.cleaned_data['name']
-        if Category.objects.filter(name__iexact=name).exists():
-            raise forms.ValidationError("Категория с таким названием уже существует")
+        user = self.instance.user if hasattr(self.instance, 'user') else self.user
+
+        if Category.objects.filter(user=user, name__iexact=name).exclude(pk=self.instance.pk).exists():
+            raise forms.ValidationError("У вас уже есть категория с таким названием")
         return name
 
 
@@ -42,6 +48,10 @@ class WordForm(forms.ModelForm):
             'category': forms.Select(attrs={'class': 'form-control'}),
         }
 
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user', None)
+        super().__init__(*args, **kwargs)
+
     def clean(self):
         cleaned_data = super().clean()
         original = cleaned_data.get('original')
@@ -54,8 +64,10 @@ class WordForm(forms.ModelForm):
 
     def clean_original(self):
         original = self.cleaned_data['original']
-        if Word.objects.filter(original__iexact=original).exists():
-            raise forms.ValidationError("Такое слово уже существует в словаре")
+        user = self.instance.user if hasattr(self.instance, 'user') else self.user
+
+        if Word.objects.filter(user=user, original__iexact=original).exclude(pk=self.instance.pk).exists():
+            raise forms.ValidationError("Это слово уже есть в вашем словаре")
         return original
 
 class RegisterForm(UserCreationForm):

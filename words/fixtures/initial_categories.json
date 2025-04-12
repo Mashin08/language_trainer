@@ -1,6 +1,7 @@
 [
     {
         "model": "words.category",
+        "pk": 1,
         "fields": {
             "name": "Основные",
             "description": "Базовые слова",
@@ -9,6 +10,7 @@
     },
     {
         "model": "words.category",
+        "pk": 2,
         "fields": {
             "name": "Приветствия",
             "description": "Слова для общения",

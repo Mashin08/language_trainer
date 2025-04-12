@@ -27,8 +27,16 @@ class Category(models.Model):
     class Meta:
         verbose_name = "Категория"
         verbose_name_plural = "Категории"
-        unique_together = ('user', 'name')
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'name'],
+                name='unique_user_category_name'
+            )
+        ]
 
+    def clean(self):
+        if Category.objects.filter(user=self.user, name=self.name).exclude(pk=self.pk).exists():
+            raise ValidationError({'name': 'Категория с таким названием уже существует у вас.'})
 
 class Word(models.Model):
     original = models.CharField(
@@ -90,3 +98,13 @@ class Word(models.Model):
         verbose_name = "Слово"
         verbose_name_plural = "Слова"
         ordering = ['-created_at']
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'original'],
+                name='unique_user_word_original'
+            )
+        ]
+
+    def clean(self):
+        if Word.objects.filter(user=self.user, original=self.original).exclude(pk=self.pk).exists():
+            raise ValidationError({'original': 'Такое слово уже существует в вашем словаре.'})

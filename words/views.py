@@ -68,7 +68,7 @@ def word_list(request):
 @login_required
 def add_category(request):
     if request.method == 'POST':
-        form = CategoryForm(request.POST)
+        form = CategoryForm(request.POST, user=request.user)
         if form.is_valid():
             category = form.save(commit=False)
             category.user = request.user
@@ -78,7 +78,7 @@ def add_category(request):
         else:
             messages.error(request, "Пожалуйста, исправьте ошибки в форме")
     else:
-        form = CategoryForm()
+        form = CategoryForm(user=request.user)
 
     return render(request, 'words/add_category.html', {
         'form': form,
