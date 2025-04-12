@@ -48,21 +48,28 @@ def category_list(request):
 
 
 def word_list(request):
-    learned_filter = request.GET.get('learned', None)
+    learned_filter = request.GET.get('filter', None)
 
     if request.user.is_authenticated:
         words = Word.objects.filter(Q(user=request.user))
     else:
         words = Word.objects.filter(user__isnull=True)
 
-    if learned_filter == 'true':
-        words = words.filter(learned=True)
-    elif learned_filter == 'false':
-        words = words.filter(learned=False)
+    all_words = words.all()
+
+    if learned_filter == 'learned':
+        words = all_words.filter(learned=True)
+    elif learned_filter == 'learning':
+        words = all_words.filter(learned=False)
+    else:
+        words = all_words
 
     return render(request, 'words/word_list.html', {
         'words': words,
-        'learned_filter': learned_filter
+        'filter': learned_filter,
+        'total_words': all_words.count(),
+        'learned_count': all_words.filter(learned=True).count(),
+        'learning_count': all_words.filter(learned=False).count(),
     })
 
 @login_required
@@ -115,10 +122,33 @@ def add_word(request):
         'title': 'Добавить новое слово'
     })
 
+
 def words_by_category(request, category_id):
     category = get_object_or_404(Category, id=category_id)
+    filter_param = request.GET.get('filter', None)
+
+    # Базовый queryset для текущей категории
     words = Word.objects.filter(category=category)
-    return render(request, 'words/words_by_category.html', {'category': category, 'words': words})
+
+    # Применяем фильтрацию
+    if filter_param == 'learned':
+        words = words.filter(learned=True)
+    elif filter_param == 'learning':
+        words = words.filter(learned=False)
+
+    # Получаем статистику (всегда считаем по всем словам категории)
+    total_words = words.count()
+    learned_count = words.filter(learned=True).count()
+    learning_count = words.filter(learned=False).count()
+
+    return render(request, 'words/words_by_category.html', {
+        'category': category,
+        'words': words,
+        'filter': filter_param,
+        'total_words': total_words,
+        'learned_count': learned_count,
+        'learning_count': learning_count,
+    })
 
 
 @login_required
