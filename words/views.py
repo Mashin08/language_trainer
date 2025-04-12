@@ -1,3 +1,4 @@
+from django.db.models.functions import Cast
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import Category, Word
 from .forms import CategoryForm, WordForm
@@ -5,7 +6,7 @@ from django.contrib import messages
 from django.contrib.auth import login
 from .forms import RegisterForm
 from django.contrib.auth.decorators import login_required
-from django.db.models import Count, Q
+from django.db.models import Count, Q, ExpressionWrapper, FloatField, F
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.models import User
 from django.views.decorators.http import require_POST
@@ -124,11 +125,27 @@ def words_by_category(request, category_id):
 def stats(request):
     words = Word.objects.filter(user=request.user)
 
+    by_category = (
+        words.values('category__name')
+        .annotate(
+            total=Count('id'),
+            learned=Count('id', filter=Q(learned=True)),
+        )
+        .annotate(  # Второй annotate для расчета процента
+            percent=ExpressionWrapper(
+                F('learned') * 100.0 / F('total'),
+                output_field=FloatField()
+            )
+        )
+    ).order_by('-percent')
+
     stats = {
         'total': words.count(),
         'learned': words.filter(learned=True).count(),
+        'learned_percent': int(100 * words.filter(learned=True).count() / words.count()),
+        'to_learn_percent': 100 - int(100 * words.filter(learned=True).count() / words.count()),
         'to_learn': words.filter(learned=False).count(),
-        'by_category': words.values('category__name').annotate(total=Count('id')),
+        'by_category': by_category,
         'recent': words.order_by('-last_reviewed')[:5],
     }
 

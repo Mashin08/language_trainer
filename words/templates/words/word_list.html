@@ -50,7 +50,8 @@
                 <tr>
                     <th>Слово</th>
                     <th>Перевод</th>
-                    <th>Категория</th>
+                    <th>Транскрипция</th>
+                    <th>Пример</th>
                     <th>Статус</th>
                     <th>Действия</th>
                 </tr>
@@ -60,7 +61,8 @@
                 <tr>
                     <td>{{ word.original }}</td>
                     <td>{{ word.translation }}</td>
-                    <td>{{ word.category.name|default:"-" }}</td>
+                    <td>{{ word.transcription }}</td>
+                    <td>{{ word.example }}</td>
                     <td>
                         <span class="badge bg-{% if word.learned %}success{% else %}warning{% endif %}">
                             {% if word.learned %}
